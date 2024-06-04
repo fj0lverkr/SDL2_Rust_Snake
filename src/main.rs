@@ -58,6 +58,7 @@ fn main() -> Result<(), String> {
         pub fn draw(&mut self, context: &GameContext) -> Result<(), String> {
             self.draw_bg(context);
             self.draw_player(context)?;
+            self.draw_food(context)?;
             self.canvas.present();
 
             Ok(())
@@ -80,6 +81,12 @@ fn main() -> Result<(), String> {
             for point in &context.player_position {
                 self.draw_point(point)?;
             }
+            Ok(())
+        }
+
+        fn draw_food(&mut self, context: &GameContext) -> Result<(), String> {
+            self.canvas.set_draw_color(Color::RED);
+            self.draw_point(&context.food)?;
             Ok(())
         }
 
