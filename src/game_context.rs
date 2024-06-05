@@ -44,6 +44,7 @@ pub struct GameContext {
     pub player_direction: PlayerDirection,
     pub food: Point,
     pub state: GameState,
+    pub score: i32,
 }
 
 impl Default for GameContext {
@@ -59,6 +60,7 @@ impl GameContext {
             player_direction: PlayerDirection::Right,
             state: GameState::Paused,
             food: Point::new(),
+            score: 0,
         }
     }
 
@@ -75,6 +77,7 @@ impl GameContext {
             };
 
             if next_player_head_pos == self.food {
+                self.score += 1;
                 self.player_position.push(Point(0, 0));
                 self.food = Point::new();
             }
@@ -82,6 +85,7 @@ impl GameContext {
             for p in &self.player_position {
                 if next_player_head_pos == *p {
                     self.state = GameState::Over;
+                    println!("Final score: {}!", self.score);
                 }
             }
 

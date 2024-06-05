@@ -5,7 +5,7 @@ use sdl2::keyboard::Keycode;
 use std::time::Duration;
 
 use sdl2_snake::constants::{DOT_SIZE_IN_PXS, FRAMES_PER_SECOND, GRID_X_SIZE, GRID_Y_SIZE};
-use sdl2_snake::game_context::{GameContext, PlayerDirection};
+use sdl2_snake::game_context::{GameContext, GameState, PlayerDirection};
 use sdl2_snake::renderer::Renderer;
 
 fn main() -> Result<(), String> {
@@ -43,7 +43,13 @@ fn main() -> Result<(), String> {
                     Keycode::W | Keycode::Up => context.move_player(PlayerDirection::Up),
                     Keycode::D | Keycode::Right => context.move_player(PlayerDirection::Right),
                     Keycode::S | Keycode::Down => context.move_player(PlayerDirection::Down),
-                    Keycode::Escape => context.toggle_pause(),
+                    Keycode::Escape => {
+                        if let GameState::Over = context.state {
+                            context = GameContext::new()
+                        } else {
+                            context.toggle_pause()
+                        }
+                    }
                     _ => {}
                 },
                 _ => {}
