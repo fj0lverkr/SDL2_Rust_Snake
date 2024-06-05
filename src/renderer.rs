@@ -1,7 +1,7 @@
 extern crate sdl2;
 
 use crate::constants::DOT_SIZE_IN_PXS;
-use crate::game_context::{GameContext, GameState, PlayerDirection, Point};
+use crate::game_context::{GameContext, GameState, Point};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
