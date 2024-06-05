@@ -4,8 +4,8 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use std::time::Duration;
 
-use sdl2_snake::constants::{DOT_SIZE_IN_PXS, GRID_X_SIZE, GRID_Y_SIZE};
-use sdl2_snake::game_context::GameContext;
+use sdl2_snake::constants::{DOT_SIZE_IN_PXS, FRAMES_PER_SECOND, GRID_X_SIZE, GRID_Y_SIZE};
+use sdl2_snake::game_context::{GameContext, GameState, PlayerDirection};
 use sdl2_snake::renderer::Renderer;
 
 fn main() -> Result<(), String> {
@@ -34,20 +34,29 @@ fn main() -> Result<(), String> {
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
-                Event::Quit { .. }
-                | Event::KeyDown {
-                    keycode: Some(Keycode::Escape),
+                Event::Quit { .. } => break 'running,
+                Event::KeyDown {
+                    keycode: Some(keycode),
                     ..
-                } => break 'running,
+                } => match keycode {
+                    Keycode::A | Keycode::Left => context.move_player(PlayerDirection::Left),
+                    Keycode::W | Keycode::Up => context.move_player(PlayerDirection::Up),
+                    Keycode::D | Keycode::Right => context.move_player(PlayerDirection::Right),
+                    Keycode::S | Keycode::Down => context.move_player(PlayerDirection::Down),
+                    Keycode::Escape => context.toggle_pause(),
+                    _ => {}
+                },
                 _ => {}
             }
         }
 
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 30));
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / FRAMES_PER_SECOND));
 
-        frame_counter += 1;
-        if frame_counter % 10 == 0 {
-            context.do_next_tick();
+        if let GameState::Playing = context.state {
+            frame_counter += 1;
+            if frame_counter % 10 == 0 {
+                context.do_next_tick();
+            }
         }
         renderer.draw(&context)?;
     }

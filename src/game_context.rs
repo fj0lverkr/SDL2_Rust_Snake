@@ -1,3 +1,5 @@
+use crate::constants::{GRID_X_SIZE, GRID_Y_SIZE};
+use rand::Rng;
 use std::ops::Add;
 
 pub enum GameState {
@@ -12,8 +14,23 @@ pub enum PlayerDirection {
     Right,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 pub struct Point(pub i32, pub i32);
+
+impl Point {
+    pub fn new() -> Point {
+        let mut rng = rand::thread_rng();
+        let rnd_x = rng.gen_range(1..GRID_X_SIZE);
+        let rnd_y = rng.gen_range(1..GRID_Y_SIZE);
+        Point(rnd_x as i32, rnd_y as i32)
+    }
+}
+
+impl Default for Point {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl Add<Point> for Point {
     type Output = Point;
@@ -41,7 +58,7 @@ impl GameContext {
             player_position: vec![Point(3, 1), Point(2, 1), Point(1, 1)],
             player_direction: PlayerDirection::Right,
             state: GameState::Paused,
-            food: Point(3, 3),
+            food: Point::new(),
         }
     }
 
@@ -54,9 +71,26 @@ impl GameContext {
             PlayerDirection::Right => *current_player_head_pos + Point(1, 0),
         };
 
+        if next_player_head_pos == self.food {
+            self.player_position.push(Point(0, 0));
+            self.food = Point::new();
+        }
+
         self.player_position.pop();
         self.player_position.reverse();
         self.player_position.push(next_player_head_pos);
         self.player_position.reverse();
+    }
+
+    pub fn move_player(&mut self, direction: PlayerDirection) {
+        self.player_direction = direction;
+    }
+
+    pub fn toggle_pause(&mut self) {
+        self.state = match self.state {
+            GameState::Playing => GameState::Paused,
+            GameState::Paused => GameState::Playing,
+            GameState::Over => GameState::Over,
+        };
     }
 }
