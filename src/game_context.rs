@@ -20,8 +20,8 @@ pub struct Point(pub i32, pub i32);
 impl Point {
     pub fn new() -> Point {
         let mut rng = rand::thread_rng();
-        let rnd_x = rng.gen_range(1..GRID_X_SIZE);
-        let rnd_y = rng.gen_range(1..GRID_Y_SIZE);
+        let rnd_x = rng.gen_range(0..GRID_X_SIZE);
+        let rnd_y = rng.gen_range(0..GRID_Y_SIZE);
         Point(rnd_x as i32, rnd_y as i32)
     }
 }
