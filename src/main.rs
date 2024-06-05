@@ -5,7 +5,7 @@ use sdl2::keyboard::Keycode;
 use std::time::Duration;
 
 use sdl2_snake::constants::{DOT_SIZE_IN_PXS, FRAMES_PER_SECOND, GRID_X_SIZE, GRID_Y_SIZE};
-use sdl2_snake::game_context::{GameContext, GameState, PlayerDirection};
+use sdl2_snake::game_context::{GameContext, PlayerDirection};
 use sdl2_snake::renderer::Renderer;
 
 fn main() -> Result<(), String> {
@@ -52,11 +52,9 @@ fn main() -> Result<(), String> {
 
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / FRAMES_PER_SECOND));
 
-        if let GameState::Playing = context.state {
-            frame_counter += 1;
-            if frame_counter % 10 == 0 {
-                context.do_next_tick();
-            }
+        frame_counter += 1;
+        if frame_counter % 10 == 0 {
+            context.do_next_tick();
         }
         renderer.draw(&context)?;
     }

@@ -63,23 +63,33 @@ impl GameContext {
     }
 
     pub fn do_next_tick(&mut self) {
-        let current_player_head_pos = self.player_position.first().unwrap();
-        let next_player_head_pos = match self.player_direction {
-            PlayerDirection::Up => *current_player_head_pos + Point(0, -1),
-            PlayerDirection::Down => *current_player_head_pos + Point(0, 1),
-            PlayerDirection::Left => *current_player_head_pos + Point(-1, 0),
-            PlayerDirection::Right => *current_player_head_pos + Point(1, 0),
-        };
+        if let GameState::Over = self.state {
+            self.player_position.pop();
+        } else if let GameState::Playing = self.state {
+            let current_player_head_pos = self.player_position.first().unwrap();
+            let next_player_head_pos = match self.player_direction {
+                PlayerDirection::Up => *current_player_head_pos + Point(0, -1),
+                PlayerDirection::Down => *current_player_head_pos + Point(0, 1),
+                PlayerDirection::Left => *current_player_head_pos + Point(-1, 0),
+                PlayerDirection::Right => *current_player_head_pos + Point(1, 0),
+            };
 
-        if next_player_head_pos == self.food {
-            self.player_position.push(Point(0, 0));
-            self.food = Point::new();
+            if next_player_head_pos == self.food {
+                self.player_position.push(Point(0, 0));
+                self.food = Point::new();
+            }
+
+            for p in &self.player_position {
+                if next_player_head_pos == *p {
+                    self.state = GameState::Over;
+                }
+            }
+
+            self.player_position.pop();
+            self.player_position.reverse();
+            self.player_position.push(next_player_head_pos);
+            self.player_position.reverse();
         }
-
-        self.player_position.pop();
-        self.player_position.reverse();
-        self.player_position.push(next_player_head_pos);
-        self.player_position.reverse();
     }
 
     pub fn move_player(&mut self, direction: PlayerDirection) {
