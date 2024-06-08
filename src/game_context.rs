@@ -31,11 +31,21 @@ impl Display for GameMode {
 pub struct Point(pub i32, pub i32);
 
 impl Point {
-    pub fn new() -> Point {
+    fn new() -> Point {
         let mut rng = rand::thread_rng();
         let rnd_x = rng.gen_range(0..GRID_X_SIZE);
         let rnd_y = rng.gen_range(0..GRID_Y_SIZE);
         Point(rnd_x as i32, rnd_y as i32)
+    }
+
+    pub fn new_no_intersect(no_intersect: &Vec<Point>) -> Point {
+        let mut new_point = Point::new();
+        for p in no_intersect {
+            if new_point == *p {
+                new_point = Point::new_no_intersect(no_intersect);
+            }
+        }
+        new_point
     }
 }
 
@@ -74,7 +84,7 @@ impl GameContext {
             player_direction: PlayerDirection::Right,
             state: GameState::Paused,
             mode: GameMode::Classic,
-            food: Point::new(),
+            food: Point::new_no_intersect(&vec![Point(3, 1), Point(2, 1), Point(1, 1)]),
             score: 0,
         }
     }
@@ -97,7 +107,7 @@ impl GameContext {
             if next_player_head_pos == self.food {
                 self.score += 1;
                 self.player_position.push(Point(0, 0));
-                self.food = Point::new();
+                self.food = Point::new_no_intersect(&self.player_position);
             }
 
             // Detect snake collision with snake
