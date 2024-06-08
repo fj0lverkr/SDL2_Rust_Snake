@@ -5,16 +5,22 @@ use crate::game_context::{GameContext, GameState, Point};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
+use sdl2::ttf::Sdl2TtfContext;
 use sdl2::video::Window;
 
 pub struct Renderer {
     canvas: WindowCanvas,
+    ttf_context: Sdl2TtfContext,
 }
 
 impl Renderer {
     pub fn new(window: Window) -> Result<Renderer, String> {
         let canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
-        Ok(Renderer { canvas })
+        let ttf_context = sdl2::ttf::init().map_err(|e| e.to_string())?;
+        Ok(Renderer {
+            canvas,
+            ttf_context,
+        })
     }
 
     pub fn draw(&mut self, context: &GameContext) -> Result<(), String> {
