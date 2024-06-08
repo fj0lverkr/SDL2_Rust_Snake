@@ -43,6 +43,11 @@ fn main() -> Result<(), String> {
                     Keycode::W | Keycode::Up => context.move_player(PlayerDirection::Up),
                     Keycode::D | Keycode::Right => context.move_player(PlayerDirection::Right),
                     Keycode::S | Keycode::Down => context.move_player(PlayerDirection::Down),
+                    Keycode::M => {
+                        if let GameState::Paused = context.state {
+                            context.toggle_mode()
+                        }
+                    }
                     Keycode::Escape => {
                         if let GameState::Over = context.state {
                             context = GameContext::new()

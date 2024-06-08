@@ -1,6 +1,6 @@
 use crate::constants::{GRID_X_SIZE, GRID_Y_SIZE};
 use rand::Rng;
-use std::ops::Add;
+use std::{fmt::Display, ops::Add};
 
 pub enum GameState {
     Playing,
@@ -12,6 +12,19 @@ pub enum PlayerDirection {
     Down,
     Left,
     Right,
+}
+pub enum GameMode {
+    Classic,
+    WallPass,
+}
+
+impl Display for GameMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match *self {
+            GameMode::Classic => write!(f, "Classic"),
+            GameMode::WallPass => write!(f, "Wall Pass"),
+        }
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -44,6 +57,7 @@ pub struct GameContext {
     pub player_direction: PlayerDirection,
     pub food: Point,
     pub state: GameState,
+    pub mode: GameMode,
     pub score: i32,
 }
 
@@ -59,6 +73,7 @@ impl GameContext {
             player_position: vec![Point(3, 1), Point(2, 1), Point(1, 1)],
             player_direction: PlayerDirection::Right,
             state: GameState::Paused,
+            mode: GameMode::Classic,
             food: Point::new(),
             score: 0,
         }
@@ -66,27 +81,75 @@ impl GameContext {
 
     pub fn do_next_tick(&mut self) {
         if let GameState::Over = self.state {
+            // Death animation
             self.player_position.pop();
         } else if let GameState::Playing = self.state {
+            let mut player_is_alive = true;
             let current_player_head_pos = self.player_position.first().unwrap();
-            let next_player_head_pos = match self.player_direction {
+            let mut next_player_head_pos = match self.player_direction {
                 PlayerDirection::Up => *current_player_head_pos + Point(0, -1),
                 PlayerDirection::Down => *current_player_head_pos + Point(0, 1),
                 PlayerDirection::Left => *current_player_head_pos + Point(-1, 0),
                 PlayerDirection::Right => *current_player_head_pos + Point(1, 0),
             };
 
+            // Detect snake collision with food
             if next_player_head_pos == self.food {
                 self.score += 1;
                 self.player_position.push(Point(0, 0));
                 self.food = Point::new();
             }
 
-            for p in &self.player_position {
+            // Detect snake collision with snake
+            for p in &mut self.player_position {
                 if next_player_head_pos == *p {
-                    self.state = GameState::Over;
-                    println!("Final score: {}!", self.score);
+                    player_is_alive = false;
+                    break;
                 }
+            }
+
+            if !player_is_alive {
+                self.game_over();
+            }
+
+            // Detect snake collision with walls
+            let signed_grid_x_size = GRID_X_SIZE as i32;
+            let signed_grid_y_size = GRID_Y_SIZE as i32;
+
+            match self.mode {
+                GameMode::Classic => {
+                    if next_player_head_pos.0 == -1
+                        || next_player_head_pos.0 == signed_grid_x_size + 1
+                        || next_player_head_pos.1 == -1
+                        || next_player_head_pos.1 == signed_grid_y_size + 1
+                    {
+                        self.game_over();
+                    }
+                }
+                GameMode::WallPass => match self.player_direction {
+                    PlayerDirection::Up => {
+                        if next_player_head_pos.1 == -1 {
+                            next_player_head_pos =
+                                Point(next_player_head_pos.0, signed_grid_y_size);
+                        }
+                    }
+                    PlayerDirection::Down => {
+                        if next_player_head_pos.1 == signed_grid_y_size + 1 {
+                            next_player_head_pos = Point(next_player_head_pos.0, 0);
+                        }
+                    }
+                    PlayerDirection::Left => {
+                        if next_player_head_pos.0 == -1 {
+                            next_player_head_pos =
+                                Point(signed_grid_x_size, next_player_head_pos.1);
+                        }
+                    }
+                    PlayerDirection::Right => {
+                        if next_player_head_pos.0 == signed_grid_x_size + 1 {
+                            next_player_head_pos = Point(0, next_player_head_pos.1);
+                        }
+                    }
+                },
             }
 
             self.player_position.pop();
@@ -106,5 +169,19 @@ impl GameContext {
             GameState::Paused => GameState::Playing,
             GameState::Over => GameState::Over,
         };
+    }
+
+    pub fn toggle_mode(&mut self) {
+        self.mode = match self.mode {
+            GameMode::WallPass => GameMode::Classic,
+            GameMode::Classic => GameMode::WallPass,
+        };
+
+        println!("Gamemode changed to {}", self.mode);
+    }
+
+    fn game_over(&mut self) {
+        self.state = GameState::Over;
+        println!("Final score: {}!", self.score);
     }
 }
