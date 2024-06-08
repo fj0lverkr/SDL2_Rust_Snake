@@ -177,7 +177,19 @@ impl GameContext {
             GameMode::Classic => GameMode::WallPass,
         };
 
-        println!("Gamemode changed to {}", self.mode);
+        self.score = 0;
+        let new_player_position = vec![
+            self.player_position[0],
+            self.player_position[1],
+            self.player_position[2],
+        ];
+
+        self.player_position = new_player_position;
+
+        println!(
+            "Gamemode changed to {}, score and snake size reset!",
+            self.mode
+        );
     }
 
     fn game_over(&mut self) {
