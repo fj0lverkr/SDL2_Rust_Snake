@@ -1,4 +1,10 @@
-use crate::constants::{GRID_X_SIZE, GRID_Y_SIZE};
+extern crate sdl2;
+use sdl2::pixels::Color;
+
+use crate::{
+    constants::{GRID_X_SIZE, GRID_Y_SIZE},
+    entities::text_element::{FontName, TextElement},
+};
 use rand::Rng;
 use std::{fmt::Display, ops::Add};
 
@@ -69,6 +75,7 @@ pub struct GameContext {
     pub state: GameState,
     pub mode: GameMode,
     pub score: i32,
+    pub text_elements: Vec<TextElement>,
 }
 
 impl Default for GameContext {
@@ -79,13 +86,35 @@ impl Default for GameContext {
 
 impl GameContext {
     pub fn new() -> GameContext {
+        let score_text_elem = TextElement {
+            name: String::from("score"),
+            pos_x: 5,
+            pos_y: 5,
+            font_name: FontName::ArcadeNormal,
+            font_size: 24,
+            color: Color::WHITE,
+            text: String::from("0"),
+        };
+
+        let half_x = (GRID_X_SIZE / 2) as i32;
+        let half_y = (GRID_Y_SIZE / 2) as i32;
+
         GameContext {
-            player_position: vec![Point(3, 1), Point(2, 1), Point(1, 1)],
+            player_position: vec![
+                Point(half_x, half_y),
+                Point(half_x - 1, half_y),
+                Point(half_x - 2, half_y),
+            ],
             player_direction: PlayerDirection::Right,
             state: GameState::Paused,
             mode: GameMode::Classic,
-            food: Point::new_no_intersect(&vec![Point(3, 1), Point(2, 1), Point(1, 1)]),
+            food: Point::new_no_intersect(&vec![
+                Point(half_x, half_y),
+                Point(half_x - 1, half_y),
+                Point(half_x - 2, half_y),
+            ]),
             score: 0,
+            text_elements: vec![score_text_elem],
         }
     }
 
