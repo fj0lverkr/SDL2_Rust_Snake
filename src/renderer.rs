@@ -1,6 +1,6 @@
 extern crate sdl2;
 
-use crate::constants::{DOT_SIZE_IN_PXS, FONT_PATH, GRID_X_SIZE, GRID_Y_SIZE};
+use crate::constants::{DOT_SIZE_IN_PXS, FONT_PATH};
 use crate::entities::text_element::FontName;
 use crate::game_context::{GameContext, GameState, Point};
 use sdl2::pixels::Color;
