@@ -98,41 +98,10 @@ impl Renderer {
 
             let TextureQuery { width, height, .. } = texture.query();
 
-            // If the example text is too big for the screen, downscale it (and center irregardless)
-            let padding = 1;
-            let target =
-                self.get_centered_rect(width, height, GRID_X_SIZE - padding, GRID_Y_SIZE - padding);
+            let target = Rect::new(text.pos_x, text.pos_y, width, height);
 
             self.canvas.copy(&texture, None, Some(target))?;
         }
         Ok(())
-    }
-
-    // Scale fonts to a reasonable size when they're too big (though they might look less smooth)
-    fn get_centered_rect(
-        &self,
-        rect_width: u32,
-        rect_height: u32,
-        cons_width: u32,
-        cons_height: u32,
-    ) -> Rect {
-        let wr = rect_width as f32 / cons_width as f32;
-        let hr = rect_height as f32 / cons_height as f32;
-
-        let (w, h) = if wr > 1f32 || hr > 1f32 {
-            if wr > hr {
-                let h = (rect_height as f32 / wr) as u32;
-                (cons_width, h)
-            } else {
-                let w = (rect_width as f32 / hr) as u32;
-                (w, cons_height)
-            }
-        } else {
-            (rect_width, rect_height)
-        };
-
-        let cx = (GRID_X_SIZE as i32 - w as i32) / 2;
-        let cy = (GRID_Y_SIZE as i32 - h as i32) / 2;
-        Rect::new(cx, cy, w, h)
     }
 }
