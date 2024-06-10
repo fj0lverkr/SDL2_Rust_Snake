@@ -121,11 +121,9 @@ impl Renderer {
 
         let (w, h) = if wr > 1f32 || hr > 1f32 {
             if wr > hr {
-                println!("Scaling down! The text will look worse!");
                 let h = (rect_height as f32 / wr) as u32;
                 (cons_width, h)
             } else {
-                println!("Scaling down! The text will look worse!");
                 let w = (rect_width as f32 / hr) as u32;
                 (w, cons_height)
             }
