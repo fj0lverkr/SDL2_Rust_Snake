@@ -134,8 +134,9 @@ impl GameContext {
 
             // Detect snake collision with food
             if next_player_head_pos == self.food {
-                self.score += 1;
                 self.player_position.push(Point(0, 0));
+                self.score += 1;
+                self.update_display_score();
                 self.food = Point::new_no_intersect(&self.player_position);
             }
 
@@ -229,10 +230,22 @@ impl GameContext {
             "Gamemode changed to {}, score and snake size reset!",
             self.mode
         );
+
+        self.update_display_score();
     }
 
     fn game_over(&mut self) {
         self.state = GameState::Over;
         println!("Final score: {}!", self.score);
+    }
+
+    fn update_display_score(&mut self) {
+        let index = self
+            .text_elements
+            .iter()
+            .position(|r| r.name == "score")
+            .unwrap();
+        let ui_score_text = self.text_elements.get_mut(index).unwrap();
+        ui_score_text.text = self.score.to_string();
     }
 }
