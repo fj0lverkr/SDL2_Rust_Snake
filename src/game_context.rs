@@ -88,7 +88,7 @@ impl Default for GameContext {
 impl GameContext {
     pub fn new() -> GameContext {
         let mut score_text_element =
-            TextElement::new(String::from("score_element"), Position2D::new(5, 5), false);
+            TextElement::new(String::from("score_element"), Position2D::new(5, 5), true);
         let score_text_line = TextLine::new(
             String::from("score"),
             Position2D::new(5, 5),

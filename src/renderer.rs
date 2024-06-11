@@ -1,6 +1,6 @@
 extern crate sdl2;
 
-use crate::constants::{DOT_SIZE_IN_PXS, FONT_PATH};
+use crate::constants::{DOT_SIZE_IN_PXS, FONT_PATH, GRID_X_SIZE, GRID_Y_SIZE};
 use crate::entities::text_elements::FontName;
 use crate::game_context::{GameContext, GameState, Point};
 use sdl2::pixels::Color;
@@ -79,6 +79,9 @@ impl Renderer {
         texture_creator: &TextureCreator<WindowContext>,
     ) -> Result<(), String> {
         for element in &context.text_elements {
+            if element.is_overlay {
+                self.create_overlay();
+            }
             for text in &element.lines {
                 let font_name = match text.font.font_name {
                     FontName::ArcadeInterlaced => "ArcadeInterlaced-O4d.ttf",
@@ -99,11 +102,21 @@ impl Renderer {
 
                 let TextureQuery { width, height, .. } = texture.query();
 
-                let target = Rect::new(text.position.x, text.position.y, width, height);
+                let target_x = element.position.x + text.position.x;
+                let target_y = element.position.y + text.position.y;
+
+                let target = Rect::new(target_x, target_y, width, height);
 
                 self.canvas.copy(&texture, None, Some(target))?;
             }
         }
         Ok(())
+    }
+    fn create_overlay(&mut self) {
+        let width = GRID_X_SIZE * DOT_SIZE_IN_PXS;
+        let height = GRID_Y_SIZE * DOT_SIZE_IN_PXS;
+        self.canvas.set_draw_color(Color::RGBA(0, 0, 0, 25));
+        let overlay = Rect::new(0, 0, width, height);
+        self.canvas.fill_rect(overlay).unwrap();
     }
 }
