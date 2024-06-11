@@ -1,7 +1,7 @@
 extern crate sdl2;
 
 use crate::constants::{DOT_SIZE_IN_PXS, FONT_PATH};
-use crate::entities::text_element::FontName;
+use crate::entities::text_elements::FontName;
 use crate::game_context::{GameContext, GameState, Point};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
@@ -78,29 +78,31 @@ impl Renderer {
         context: &GameContext,
         texture_creator: &TextureCreator<WindowContext>,
     ) -> Result<(), String> {
-        for text in &context.text_elements {
-            let font_name = match text.font_name {
-                FontName::ArcadeInterlaced => "ArcadeInterlaced-O4d.ttf",
-                FontName::ArcadeNormal => "ArcadeNormal-ZDZ.ttf",
-                FontName::ArcadeRounded => "ArcadeRounded-3DM.ttf",
-            };
-            let font_path = format!("{FONT_PATH}{font_name}");
-            let font = self.ttf_context.load_font(font_path, text.font_size)?;
+        for element in &context.text_elements {
+            for text in &element.lines {
+                let font_name = match text.font.font_name {
+                    FontName::ArcadeInterlaced => "ArcadeInterlaced-O4d.ttf",
+                    FontName::ArcadeNormal => "ArcadeNormal-ZDZ.ttf",
+                    FontName::ArcadeRounded => "ArcadeRounded-3DM.ttf",
+                };
+                let font_path = format!("{FONT_PATH}{font_name}");
+                let font = self.ttf_context.load_font(font_path, text.font.font_size)?;
 
-            // render a surface, and convert it to a texture bound to the canvas
-            let surface = font
-                .render(text.text.as_str())
-                .blended(text.color)
-                .map_err(|e| e.to_string())?;
-            let texture = texture_creator
-                .create_texture_from_surface(&surface)
-                .map_err(|e| e.to_string())?;
+                // render a surface, and convert it to a texture bound to the canvas
+                let surface = font
+                    .render(text.text.as_str())
+                    .blended(text.font.color)
+                    .map_err(|e| e.to_string())?;
+                let texture = texture_creator
+                    .create_texture_from_surface(&surface)
+                    .map_err(|e| e.to_string())?;
 
-            let TextureQuery { width, height, .. } = texture.query();
+                let TextureQuery { width, height, .. } = texture.query();
 
-            let target = Rect::new(text.pos_x, text.pos_y, width, height);
+                let target = Rect::new(text.position.x, text.position.y, width, height);
 
-            self.canvas.copy(&texture, None, Some(target))?;
+                self.canvas.copy(&texture, None, Some(target))?;
+            }
         }
         Ok(())
     }

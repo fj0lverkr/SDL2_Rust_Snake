@@ -3,7 +3,8 @@ use sdl2::pixels::Color;
 
 use crate::{
     constants::{GRID_X_SIZE, GRID_Y_SIZE},
-    entities::text_element::{FontName, TextElement},
+    data_structs::Position2D,
+    entities::text_elements::{FontDefinition, FontName, TextElement, TextLine},
 };
 use rand::Rng;
 use std::{fmt::Display, ops::Add};
@@ -86,27 +87,15 @@ impl Default for GameContext {
 
 impl GameContext {
     pub fn new() -> GameContext {
-        let score_text_elem = TextElement::new(
+        let mut score_text_element =
+            TextElement::new(String::from("score_element"), Position2D::new(5, 5), false);
+        let score_text_line = TextLine::new(
             String::from("score"),
-            5,
-            5,
-            FontName::ArcadeNormal,
-            24,
-            Color::WHITE,
+            Position2D::new(5, 5),
+            FontDefinition::new(FontName::ArcadeNormal, 24, Color::WHITE),
             String::from("0"),
-            false,
         );
-        let pause_text_elem = TextElement::new(
-            String::from("pause"),
-            0,
-            0,
-            FontName::ArcadeInterlaced,
-            48,
-            Color::WHITE,
-            String::from("Game Paused\nPress ESC to continue, M to change mode."),
-            true,
-        );
-
+        score_text_element.lines.push(score_text_line);
         let half_x = (GRID_X_SIZE / 2) as i32;
         let half_y = (GRID_Y_SIZE / 2) as i32;
 
@@ -125,7 +114,8 @@ impl GameContext {
                 Point(half_x - 2, half_y),
             ]),
             score: 0,
-            text_elements: vec![score_text_elem, pause_text_elem],
+
+            text_elements: vec![score_text_element],
         }
     }
 
@@ -254,9 +244,15 @@ impl GameContext {
         let index = self
             .text_elements
             .iter()
-            .position(|r| r.name == "score")
+            .position(|r| r.name == "score_element")
             .unwrap();
         let ui_score_text = self.text_elements.get_mut(index).unwrap();
+        let index = ui_score_text
+            .lines
+            .iter()
+            .position(|r| r.name == "score")
+            .unwrap();
+        let ui_score_text = ui_score_text.lines.get_mut(index).unwrap();
         ui_score_text.text = self.score.to_string();
     }
 }
