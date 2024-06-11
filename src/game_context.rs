@@ -86,15 +86,26 @@ impl Default for GameContext {
 
 impl GameContext {
     pub fn new() -> GameContext {
-        let score_text_elem = TextElement {
-            name: String::from("score"),
-            pos_x: 5,
-            pos_y: 5,
-            font_name: FontName::ArcadeNormal,
-            font_size: 24,
-            color: Color::WHITE,
-            text: String::from("0"),
-        };
+        let score_text_elem = TextElement::new(
+            String::from("score"),
+            5,
+            5,
+            FontName::ArcadeNormal,
+            24,
+            Color::WHITE,
+            String::from("0"),
+            false,
+        );
+        let pause_text_elem = TextElement::new(
+            String::from("pause"),
+            0,
+            0,
+            FontName::ArcadeInterlaced,
+            48,
+            Color::WHITE,
+            String::from("Game Paused\nPress ESC to continue, M to change mode."),
+            true,
+        );
 
         let half_x = (GRID_X_SIZE / 2) as i32;
         let half_y = (GRID_Y_SIZE / 2) as i32;
@@ -114,7 +125,7 @@ impl GameContext {
                 Point(half_x - 2, half_y),
             ]),
             score: 0,
-            text_elements: vec![score_text_elem],
+            text_elements: vec![score_text_elem, pause_text_elem],
         }
     }
 
