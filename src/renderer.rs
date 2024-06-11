@@ -5,7 +5,7 @@ use crate::entities::text_elements::FontName;
 use crate::game_context::{GameContext, GameState, Point};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use sdl2::render::{TextureCreator, TextureQuery, WindowCanvas};
+use sdl2::render::{BlendMode, TextureCreator, TextureQuery, WindowCanvas};
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::video::{Window, WindowContext};
 
@@ -16,7 +16,8 @@ pub struct Renderer {
 
 impl Renderer {
     pub fn new(window: Window) -> Result<Renderer, String> {
-        let canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
+        let mut canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
+        canvas.set_blend_mode(BlendMode::Blend);
         let ttf_context = sdl2::ttf::init().map_err(|e| e.to_string())?;
         Ok(Renderer {
             canvas,
@@ -115,7 +116,7 @@ impl Renderer {
     fn create_overlay(&mut self) {
         let width = GRID_X_SIZE * DOT_SIZE_IN_PXS;
         let height = GRID_Y_SIZE * DOT_SIZE_IN_PXS;
-        self.canvas.set_draw_color(Color::RGBA(0, 0, 0, 25));
+        self.canvas.set_draw_color(Color::RGBA(0, 0, 0, 200));
         let overlay = Rect::new(0, 0, width, height);
         self.canvas.fill_rect(overlay).unwrap();
     }
