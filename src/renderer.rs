@@ -83,7 +83,7 @@ impl Renderer {
             if element.is_overlay {
                 self.create_overlay();
             }
-            for text in &element.lines {
+            for (i, text) in element.lines.iter().enumerate() {
                 let font_name = match text.font.font_name {
                     FontName::ArcadeInterlaced => "ArcadeInterlaced-O4d.ttf",
                     FontName::ArcadeNormal => "ArcadeNormal-ZDZ.ttf",
@@ -103,8 +103,18 @@ impl Renderer {
 
                 let TextureQuery { width, height, .. } = texture.query();
 
-                let target_x = element.position.x + text.position.x;
-                let target_y = element.position.y + text.position.y;
+                let mut target_x = element.position.x + text.position.x;
+                let mut target_y = element.position.y + text.position.y;
+
+                if element.is_overlay {
+                    let mut line_factor = (element.lines.len() / 2) as i32;
+                    if line_factor == 0 {
+                        line_factor = 1;
+                    }
+                    target_x = (((GRID_X_SIZE * DOT_SIZE_IN_PXS) / 2) - (width / 2)) as i32;
+                    target_y = ((GRID_Y_SIZE * DOT_SIZE_IN_PXS) / 2) as i32
+                        - (element.lines.len() as i32 / line_factor - i as i32) * height as i32;
+                }
 
                 let target = Rect::new(target_x, target_y, width, height);
 
