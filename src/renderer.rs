@@ -80,45 +80,47 @@ impl Renderer {
         texture_creator: &TextureCreator<WindowContext>,
     ) -> Result<(), String> {
         for element in &context.text_elements {
-            if element.is_overlay {
-                self.create_overlay();
-            }
-            for (i, text) in element.lines.iter().enumerate() {
-                let font_name = match text.font.font_name {
-                    FontName::ArcadeInterlaced => "ArcadeInterlaced-O4d.ttf",
-                    FontName::ArcadeNormal => "ArcadeNormal-ZDZ.ttf",
-                    FontName::ArcadeRounded => "ArcadeRounded-3DM.ttf",
-                };
-                let font_path = format!("{FONT_PATH}{font_name}");
-                let font = self.ttf_context.load_font(font_path, text.font.font_size)?;
-
-                // render a surface, and convert it to a texture bound to the canvas
-                let surface = font
-                    .render(text.text.as_str())
-                    .blended(text.font.color)
-                    .map_err(|e| e.to_string())?;
-                let texture = texture_creator
-                    .create_texture_from_surface(&surface)
-                    .map_err(|e| e.to_string())?;
-
-                let TextureQuery { width, height, .. } = texture.query();
-
-                let mut target_x = element.position.x + text.position.x;
-                let mut target_y = element.position.y + text.position.y;
-
+            if element.visible {
                 if element.is_overlay {
-                    let mut line_factor = (element.lines.len() / 2) as i32;
-                    if line_factor == 0 {
-                        line_factor = 1;
-                    }
-                    target_x = (((GRID_X_SIZE * DOT_SIZE_IN_PXS) / 2) - (width / 2)) as i32;
-                    target_y = ((GRID_Y_SIZE * DOT_SIZE_IN_PXS) / 2) as i32
-                        - (element.lines.len() as i32 / line_factor - i as i32) * height as i32;
+                    self.create_overlay();
                 }
+                for (i, text) in element.lines.iter().enumerate() {
+                    let font_name = match text.font.font_name {
+                        FontName::ArcadeInterlaced => "ArcadeInterlaced-O4d.ttf",
+                        FontName::ArcadeNormal => "ArcadeNormal-ZDZ.ttf",
+                        FontName::ArcadeRounded => "ArcadeRounded-3DM.ttf",
+                    };
+                    let font_path = format!("{FONT_PATH}{font_name}");
+                    let font = self.ttf_context.load_font(font_path, text.font.font_size)?;
 
-                let target = Rect::new(target_x, target_y, width, height);
+                    // render a surface, and convert it to a texture bound to the canvas
+                    let surface = font
+                        .render(text.text.as_str())
+                        .blended(text.font.color)
+                        .map_err(|e| e.to_string())?;
+                    let texture = texture_creator
+                        .create_texture_from_surface(&surface)
+                        .map_err(|e| e.to_string())?;
 
-                self.canvas.copy(&texture, None, Some(target))?;
+                    let TextureQuery { width, height, .. } = texture.query();
+
+                    let mut target_x = element.position.x + text.position.x;
+                    let mut target_y = element.position.y + text.position.y;
+
+                    if element.is_overlay {
+                        let mut line_factor = (element.lines.len() / 2) as i32;
+                        if line_factor == 0 {
+                            line_factor = 1;
+                        }
+                        target_x = (((GRID_X_SIZE * DOT_SIZE_IN_PXS) / 2) - (width / 2)) as i32;
+                        target_y = ((GRID_Y_SIZE * DOT_SIZE_IN_PXS) / 2) as i32
+                            - (element.lines.len() as i32 / line_factor - i as i32) * height as i32;
+                    }
+
+                    let target = Rect::new(target_x, target_y, width, height);
+
+                    self.canvas.copy(&texture, None, Some(target))?;
+                }
             }
         }
         Ok(())

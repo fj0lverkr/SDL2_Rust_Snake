@@ -24,6 +24,7 @@ pub struct TextLine {
 
 pub struct TextElement {
     pub name: String,
+    pub visible: bool,
     pub position: Position2D,
     pub lines: Vec<TextLine>,
     pub is_overlay: bool,
@@ -54,6 +55,7 @@ impl TextElement {
     pub fn new(name: String, position: Position2D, is_overlay: bool) -> TextElement {
         TextElement {
             name,
+            visible: true,
             position,
             lines: vec![],
             is_overlay,

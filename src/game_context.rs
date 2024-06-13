@@ -88,7 +88,7 @@ impl Default for GameContext {
 impl GameContext {
     pub fn new() -> GameContext {
         let mut score_text_element =
-            TextElement::new(String::from("score_element"), Position2D::new(5, 5), true);
+            TextElement::new(String::from("score_element"), Position2D::new(5, 5), false);
         let score_text_line = TextLine::new(
             String::from("score"),
             Position2D::new(5, 5),
@@ -96,6 +96,17 @@ impl GameContext {
             String::from("0"),
         );
         score_text_element.lines.push(score_text_line);
+
+        let mut pause_text_element =
+            TextElement::new(String::from("pause_element"), Position2D::new(5, 5), true);
+        let pause_title_line = TextLine::new(
+            String::from("title"),
+            Position2D::new(0, 0),
+            FontDefinition::new(FontName::ArcadeInterlaced, 48, Color::WHITE),
+            String::from("Paused"),
+        );
+        pause_text_element.lines.push(pause_title_line);
+
         let half_x = (GRID_X_SIZE / 2) as i32;
         let half_y = (GRID_Y_SIZE / 2) as i32;
 
@@ -115,7 +126,7 @@ impl GameContext {
             ]),
             score: 0,
 
-            text_elements: vec![score_text_element],
+            text_elements: vec![pause_text_element, score_text_element],
         }
     }
 
@@ -210,6 +221,17 @@ impl GameContext {
             GameState::Paused => GameState::Playing,
             GameState::Over => GameState::Over,
         };
+        let pause_element_index = self
+            .text_elements
+            .iter()
+            .position(|r| r.name == "pause_text_element")
+            .unwrap_or(0);
+        let pause_element = self.text_elements.get_mut(pause_element_index).unwrap();
+        if let GameState::Paused = self.state {
+            pause_element.visible = true;
+        } else {
+            pause_element.visible = false;
+        }
     }
 
     pub fn toggle_mode(&mut self) {
