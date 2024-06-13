@@ -9,6 +9,12 @@ pub enum FontName {
     ArcadeRounded,
 }
 
+pub enum TextAlignment {
+    Start,
+    Center,
+    End,
+}
+
 pub struct FontDefinition {
     pub font_name: FontName,
     pub font_size: u16,
@@ -18,6 +24,7 @@ pub struct FontDefinition {
 pub struct TextLine {
     pub name: String,
     pub position: Position2D,
+    pub alignment: TextAlignment,
     pub font: FontDefinition,
     pub text: String,
 }
@@ -26,6 +33,7 @@ pub struct TextElement {
     pub name: String,
     pub visible: bool,
     pub position: Position2D,
+    pub alignment: TextAlignment,
     pub lines: Vec<TextLine>,
     pub is_overlay: bool,
 }
@@ -41,10 +49,17 @@ impl FontDefinition {
 }
 
 impl TextLine {
-    pub fn new(name: String, position: Position2D, font: FontDefinition, text: String) -> TextLine {
+    pub fn new(
+        name: String,
+        position: Position2D,
+        alignment: TextAlignment,
+        font: FontDefinition,
+        text: String,
+    ) -> TextLine {
         TextLine {
             name,
             position,
+            alignment,
             font,
             text,
         }
@@ -52,11 +67,17 @@ impl TextLine {
 }
 
 impl TextElement {
-    pub fn new(name: String, position: Position2D, is_overlay: bool) -> TextElement {
+    pub fn new(
+        name: String,
+        position: Position2D,
+        alignment: TextAlignment,
+        is_overlay: bool,
+    ) -> TextElement {
         TextElement {
             name,
             visible: true,
             position,
+            alignment,
             lines: vec![],
             is_overlay,
         }

@@ -1,7 +1,7 @@
 extern crate sdl2;
 
 use crate::constants::{DOT_SIZE_IN_PXS, FONT_PATH, GRID_X_SIZE, GRID_Y_SIZE};
-use crate::entities::text_elements::FontName;
+use crate::entities::text_elements::{FontName, TextAlignment};
 use crate::game_context::{GameContext, GameState, Point};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
@@ -104,8 +104,20 @@ impl Renderer {
 
                     let TextureQuery { width, height, .. } = texture.query();
 
-                    let mut target_x = element.position.x + text.position.x;
                     let mut target_y = element.position.y + text.position.y;
+
+                    let mut target_x = match element.alignment {
+                        TextAlignment::Start => element.position.x + text.position.x,
+                        TextAlignment::Center => {
+                            (GRID_X_SIZE * DOT_SIZE_IN_PXS) as i32 / 2 - text.position.x / 2
+                        }
+                        TextAlignment::End => {
+                            (GRID_X_SIZE * DOT_SIZE_IN_PXS) as i32
+                                - text.position.x
+                                - element.position.x
+                                - width as i32
+                        }
+                    };
 
                     if element.is_overlay {
                         let mut line_factor = (element.lines.len() / 2) as i32;
