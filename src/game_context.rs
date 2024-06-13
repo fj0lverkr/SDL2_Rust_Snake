@@ -1,4 +1,11 @@
-use crate::constants::{GRID_X_SIZE, GRID_Y_SIZE};
+extern crate sdl2;
+use sdl2::pixels::Color;
+
+use crate::{
+    constants::{GRID_X_SIZE, GRID_Y_SIZE},
+    data_structs::Position2D,
+    entities::text_elements::{FontDefinition, FontName, TextAlignment, TextElement, TextLine},
+};
 use rand::Rng;
 use std::{fmt::Display, ops::Add};
 
@@ -69,6 +76,7 @@ pub struct GameContext {
     pub state: GameState,
     pub mode: GameMode,
     pub score: i32,
+    pub text_elements: Vec<TextElement>,
 }
 
 impl Default for GameContext {
@@ -79,13 +87,87 @@ impl Default for GameContext {
 
 impl GameContext {
     pub fn new() -> GameContext {
+        let mut score_text_element = TextElement::new(
+            String::from("score_element"),
+            Position2D::new(5, 5),
+            TextAlignment::Start,
+            false,
+        );
+        let score_text_line = TextLine::new(
+            String::from("score"),
+            Position2D::new(5, 5),
+            TextAlignment::Start,
+            FontDefinition::new(FontName::ArcadeNormal, 24, Color::WHITE),
+            String::from("0"),
+        );
+        score_text_element.lines.push(score_text_line);
+
+        let mut mode_text_element = TextElement::new(
+            String::from("mode_element"),
+            Position2D::new(5, 5),
+            TextAlignment::End,
+            false,
+        );
+        let mode_text_line = TextLine::new(
+            String::from("game_mode"),
+            Position2D::new(5, 5),
+            TextAlignment::Start,
+            FontDefinition::new(FontName::ArcadeNormal, 24, Color::WHITE),
+            String::from("Normal"),
+        );
+        mode_text_element.lines.push(mode_text_line);
+
+        let mut pause_text_element = TextElement::new(
+            String::from("pause_element"),
+            Position2D::new(5, 5),
+            TextAlignment::Start,
+            true,
+        );
+        let pause_title_line = TextLine::new(
+            String::from("title"),
+            Position2D::new(0, 0),
+            TextAlignment::Start,
+            FontDefinition::new(FontName::ArcadeInterlaced, 48, Color::WHITE),
+            String::from("Paused"),
+        );
+        let pause_esc_line = TextLine::new(
+            String::from("esc_hint"),
+            Position2D::new(0, 0),
+            TextAlignment::Start,
+            FontDefinition::new(FontName::ArcadeRounded, 24, Color::WHITE),
+            String::from("Press ESC to unpause"),
+        );
+        let pause_mode_line = TextLine::new(
+            String::from("mode_hint"),
+            Position2D::new(0, 0),
+            TextAlignment::Start,
+            FontDefinition::new(FontName::ArcadeRounded, 24, Color::WHITE),
+            String::from("Press M to change mode"),
+        );
+        pause_text_element.lines.push(pause_title_line);
+        pause_text_element.lines.push(pause_esc_line);
+        pause_text_element.lines.push(pause_mode_line);
+
+        let half_x = (GRID_X_SIZE / 2) as i32;
+        let half_y = (GRID_Y_SIZE / 2) as i32;
+
         GameContext {
-            player_position: vec![Point(3, 1), Point(2, 1), Point(1, 1)],
+            player_position: vec![
+                Point(half_x, half_y),
+                Point(half_x - 1, half_y),
+                Point(half_x - 2, half_y),
+            ],
             player_direction: PlayerDirection::Right,
             state: GameState::Paused,
             mode: GameMode::Classic,
-            food: Point::new_no_intersect(&vec![Point(3, 1), Point(2, 1), Point(1, 1)]),
+            food: Point::new_no_intersect(&vec![
+                Point(half_x, half_y),
+                Point(half_x - 1, half_y),
+                Point(half_x - 2, half_y),
+            ]),
             score: 0,
+
+            text_elements: vec![pause_text_element, score_text_element, mode_text_element],
         }
     }
 
@@ -105,8 +187,9 @@ impl GameContext {
 
             // Detect snake collision with food
             if next_player_head_pos == self.food {
-                self.score += 1;
                 self.player_position.push(Point(0, 0));
+                self.score += 1;
+                self.update_display_score();
                 self.food = Point::new_no_intersect(&self.player_position);
             }
 
@@ -179,6 +262,17 @@ impl GameContext {
             GameState::Paused => GameState::Playing,
             GameState::Over => GameState::Over,
         };
+        let pause_element_index = self
+            .text_elements
+            .iter()
+            .position(|r| r.name == "pause_text_element")
+            .unwrap_or(0);
+        let pause_element = self.text_elements.get_mut(pause_element_index).unwrap();
+        if let GameState::Paused = self.state {
+            pause_element.visible = true;
+        } else {
+            pause_element.visible = false;
+        }
     }
 
     pub fn toggle_mode(&mut self) {
@@ -196,14 +290,44 @@ impl GameContext {
 
         self.player_position = new_player_position;
 
-        println!(
-            "Gamemode changed to {}, score and snake size reset!",
-            self.mode
-        );
+        self.update_display_score();
+        self.update_display_game_mode();
     }
 
     fn game_over(&mut self) {
         self.state = GameState::Over;
         println!("Final score: {}!", self.score);
+    }
+
+    fn update_display_score(&mut self) {
+        let index = self
+            .text_elements
+            .iter()
+            .position(|r| r.name == "score_element")
+            .unwrap();
+        let ui_score_text = self.text_elements.get_mut(index).unwrap();
+        let index = ui_score_text
+            .lines
+            .iter()
+            .position(|r| r.name == "score")
+            .unwrap();
+        let ui_score_text = ui_score_text.lines.get_mut(index).unwrap();
+        ui_score_text.text = self.score.to_string();
+    }
+
+    fn update_display_game_mode(&mut self) {
+        let index = self
+            .text_elements
+            .iter()
+            .position(|r| r.name == "mode_element")
+            .unwrap();
+        let ui_mode_text = self.text_elements.get_mut(index).unwrap();
+        let index = ui_mode_text
+            .lines
+            .iter()
+            .position(|r| r.name == "game_mode")
+            .unwrap();
+        let ui_mode_text = ui_mode_text.lines.get_mut(index).unwrap();
+        ui_mode_text.text = self.mode.to_string();
     }
 }
