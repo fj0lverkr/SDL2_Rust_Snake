@@ -139,7 +139,7 @@ impl GameContext {
             Position2D::new(0, 0),
             TextAlignment::Start,
             FontDefinition::new(FontName::ArcadeRounded, 24, Color::WHITE),
-            String::from("Press ESC to unpause"),
+            String::from("Press ESC to continue"),
         );
         let pause_mode_line = TextLine::new(
             2,
