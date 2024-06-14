@@ -94,13 +94,15 @@ impl GameContext {
             false,
         );
         let score_text_line = TextLine::new(
-            String::from("score"),
+            0,
             Position2D::new(5, 5),
             TextAlignment::Start,
             FontDefinition::new(FontName::ArcadeNormal, 24, Color::WHITE),
             String::from("0"),
         );
-        score_text_element.lines.push(score_text_line);
+        score_text_element
+            .lines
+            .insert("score_line".to_string(), score_text_line);
 
         let mut mode_text_element = TextElement::new(
             String::from("mode_element"),
@@ -109,13 +111,15 @@ impl GameContext {
             false,
         );
         let mode_text_line = TextLine::new(
-            String::from("game_mode"),
+            0,
             Position2D::new(5, 5),
             TextAlignment::Start,
             FontDefinition::new(FontName::ArcadeNormal, 24, Color::WHITE),
             String::from("Normal"),
         );
-        mode_text_element.lines.push(mode_text_line);
+        mode_text_element
+            .lines
+            .insert("game_mode_line".to_string(), mode_text_line);
 
         let mut pause_text_element = TextElement::new(
             String::from("pause_element"),
@@ -124,29 +128,35 @@ impl GameContext {
             true,
         );
         let pause_title_line = TextLine::new(
-            String::from("title"),
+            0,
             Position2D::new(0, 0),
             TextAlignment::Start,
             FontDefinition::new(FontName::ArcadeInterlaced, 48, Color::WHITE),
             String::from("Paused"),
         );
         let pause_esc_line = TextLine::new(
-            String::from("esc_hint"),
+            1,
             Position2D::new(0, 0),
             TextAlignment::Start,
             FontDefinition::new(FontName::ArcadeRounded, 24, Color::WHITE),
             String::from("Press ESC to unpause"),
         );
         let pause_mode_line = TextLine::new(
-            String::from("mode_hint"),
+            2,
             Position2D::new(0, 0),
             TextAlignment::Start,
             FontDefinition::new(FontName::ArcadeRounded, 24, Color::WHITE),
             String::from("Press M to change mode"),
         );
-        pause_text_element.lines.push(pause_title_line);
-        pause_text_element.lines.push(pause_esc_line);
-        pause_text_element.lines.push(pause_mode_line);
+        pause_text_element
+            .lines
+            .insert("pause_title_line".to_string(), pause_title_line);
+        pause_text_element
+            .lines
+            .insert("pause_esc_line".to_string(), pause_esc_line);
+        pause_text_element
+            .lines
+            .insert("pause_mode_line".to_string(), pause_mode_line);
 
         let half_x = (GRID_X_SIZE / 2) as i32;
         let half_y = (GRID_Y_SIZE / 2) as i32;
@@ -300,34 +310,26 @@ impl GameContext {
     }
 
     fn update_display_score(&mut self) {
+        let score_line = "score_line".to_string();
         let index = self
             .text_elements
             .iter()
             .position(|r| r.name == "score_element")
             .unwrap();
         let ui_score_text = self.text_elements.get_mut(index).unwrap();
-        let index = ui_score_text
-            .lines
-            .iter()
-            .position(|r| r.name == "score")
-            .unwrap();
-        let ui_score_text = ui_score_text.lines.get_mut(index).unwrap();
+        let ui_score_text = ui_score_text.lines.get_mut(&score_line).unwrap();
         ui_score_text.text = self.score.to_string();
     }
 
     fn update_display_game_mode(&mut self) {
+        let game_mode_line = "game_mode_line".to_string();
         let index = self
             .text_elements
             .iter()
             .position(|r| r.name == "mode_element")
             .unwrap();
         let ui_mode_text = self.text_elements.get_mut(index).unwrap();
-        let index = ui_mode_text
-            .lines
-            .iter()
-            .position(|r| r.name == "game_mode")
-            .unwrap();
-        let ui_mode_text = ui_mode_text.lines.get_mut(index).unwrap();
+        let ui_mode_text = ui_mode_text.lines.get_mut(&game_mode_line).unwrap();
         ui_mode_text.text = self.mode.to_string();
     }
 }

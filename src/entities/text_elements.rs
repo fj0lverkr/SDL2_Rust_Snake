@@ -1,4 +1,6 @@
 extern crate sdl2;
+use std::collections::HashMap;
+
 use sdl2::pixels::Color;
 
 use crate::data_structs::Position2D;
@@ -22,7 +24,7 @@ pub struct FontDefinition {
 }
 
 pub struct TextLine {
-    pub name: String,
+    pub vertical_order: u32,
     pub position: Position2D,
     pub alignment: TextAlignment,
     pub font: FontDefinition,
@@ -34,7 +36,7 @@ pub struct TextElement {
     pub visible: bool,
     pub position: Position2D,
     pub alignment: TextAlignment,
-    pub lines: Vec<TextLine>,
+    pub lines: HashMap<String, TextLine>,
     pub is_overlay: bool,
 }
 
@@ -50,14 +52,14 @@ impl FontDefinition {
 
 impl TextLine {
     pub fn new(
-        name: String,
+        vertical_order: u32,
         position: Position2D,
         alignment: TextAlignment,
         font: FontDefinition,
         text: String,
     ) -> TextLine {
         TextLine {
-            name,
+            vertical_order,
             position,
             alignment,
             font,
@@ -78,7 +80,7 @@ impl TextElement {
             visible: true,
             position,
             alignment,
-            lines: vec![],
+            lines: HashMap::new(),
             is_overlay,
         }
     }
