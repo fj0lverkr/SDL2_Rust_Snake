@@ -32,7 +32,7 @@ pub struct TextLine {
 }
 
 pub struct TextElement {
-    pub name: String,
+    pub draw_order: u32,
     pub visible: bool,
     pub position: Position2D,
     pub alignment: TextAlignment,
@@ -70,13 +70,13 @@ impl TextLine {
 
 impl TextElement {
     pub fn new(
-        name: String,
+        draw_order: u32,
         position: Position2D,
         alignment: TextAlignment,
         is_overlay: bool,
     ) -> TextElement {
         TextElement {
-            name,
+            draw_order,
             visible: true,
             position,
             alignment,

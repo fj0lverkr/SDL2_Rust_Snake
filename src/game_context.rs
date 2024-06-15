@@ -7,7 +7,7 @@ use crate::{
     entities::text_elements::{FontDefinition, FontName, TextAlignment, TextElement, TextLine},
 };
 use rand::Rng;
-use std::{fmt::Display, ops::Add};
+use std::{collections::HashMap, fmt::Display, ops::Add};
 
 pub enum GameState {
     Playing,
@@ -76,7 +76,7 @@ pub struct GameContext {
     pub state: GameState,
     pub mode: GameMode,
     pub score: i32,
-    pub text_elements: Vec<TextElement>,
+    pub text_elements: HashMap<String, TextElement>,
 }
 
 impl Default for GameContext {
@@ -87,12 +87,10 @@ impl Default for GameContext {
 
 impl GameContext {
     pub fn new() -> GameContext {
-        let mut score_text_element = TextElement::new(
-            String::from("score_element"),
-            Position2D::new(5, 5),
-            TextAlignment::Start,
-            false,
-        );
+        let mut text_elements: HashMap<String, TextElement> = HashMap::new();
+
+        let mut score_text_element =
+            TextElement::new(0, Position2D::new(5, 5), TextAlignment::Start, false);
         let score_text_line = TextLine::new(
             0,
             Position2D::new(5, 5),
@@ -104,12 +102,8 @@ impl GameContext {
             .lines
             .insert("score_line".to_string(), score_text_line);
 
-        let mut mode_text_element = TextElement::new(
-            String::from("mode_element"),
-            Position2D::new(5, 5),
-            TextAlignment::End,
-            false,
-        );
+        let mut mode_text_element =
+            TextElement::new(0, Position2D::new(5, 5), TextAlignment::End, false);
         let mode_text_line = TextLine::new(
             0,
             Position2D::new(5, 5),
@@ -121,12 +115,8 @@ impl GameContext {
             .lines
             .insert("game_mode_line".to_string(), mode_text_line);
 
-        let mut pause_text_element = TextElement::new(
-            String::from("pause_element"),
-            Position2D::new(5, 5),
-            TextAlignment::Start,
-            true,
-        );
+        let mut pause_text_element =
+            TextElement::new(1, Position2D::new(5, 5), TextAlignment::Start, true);
         let pause_title_line = TextLine::new(
             0,
             Position2D::new(0, 0),
@@ -158,6 +148,10 @@ impl GameContext {
             .lines
             .insert("pause_mode_line".to_string(), pause_mode_line);
 
+        text_elements.insert("pause_element".to_string(), pause_text_element);
+        text_elements.insert("score_element".to_string(), score_text_element);
+        text_elements.insert("mode_element".to_string(), mode_text_element);
+
         let half_x = (GRID_X_SIZE / 2) as i32;
         let half_y = (GRID_Y_SIZE / 2) as i32;
 
@@ -176,8 +170,7 @@ impl GameContext {
                 Point(half_x - 2, half_y),
             ]),
             score: 0,
-
-            text_elements: vec![pause_text_element, score_text_element, mode_text_element],
+            text_elements,
         }
     }
 
@@ -272,12 +265,7 @@ impl GameContext {
             GameState::Paused => GameState::Playing,
             GameState::Over => GameState::Over,
         };
-        let pause_element_index = self
-            .text_elements
-            .iter()
-            .position(|r| r.name == "pause_text_element")
-            .unwrap_or(0);
-        let pause_element = self.text_elements.get_mut(pause_element_index).unwrap();
+        let pause_element = self.text_elements.get_mut("pause_element").unwrap();
         if let GameState::Paused = self.state {
             pause_element.visible = true;
         } else {
@@ -310,26 +298,14 @@ impl GameContext {
     }
 
     fn update_display_score(&mut self) {
-        let score_line = "score_line".to_string();
-        let index = self
-            .text_elements
-            .iter()
-            .position(|r| r.name == "score_element")
-            .unwrap();
-        let ui_score_text = self.text_elements.get_mut(index).unwrap();
-        let ui_score_text = ui_score_text.lines.get_mut(&score_line).unwrap();
+        let ui_score_text = self.text_elements.get_mut("score_element").unwrap();
+        let ui_score_text = ui_score_text.lines.get_mut("score_line").unwrap();
         ui_score_text.text = self.score.to_string();
     }
 
     fn update_display_game_mode(&mut self) {
-        let game_mode_line = "game_mode_line".to_string();
-        let index = self
-            .text_elements
-            .iter()
-            .position(|r| r.name == "mode_element")
-            .unwrap();
-        let ui_mode_text = self.text_elements.get_mut(index).unwrap();
-        let ui_mode_text = ui_mode_text.lines.get_mut(&game_mode_line).unwrap();
+        let ui_mode_text = self.text_elements.get_mut("mode_element").unwrap();
+        let ui_mode_text = ui_mode_text.lines.get_mut("game_mode_line").unwrap();
         ui_mode_text.text = self.mode.to_string();
     }
 }

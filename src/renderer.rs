@@ -1,7 +1,7 @@
 extern crate sdl2;
 
 use crate::constants::{DOT_SIZE_IN_PXS, FONT_PATH, GRID_X_SIZE, GRID_Y_SIZE};
-use crate::entities::text_elements::{FontName, TextAlignment};
+use crate::entities::text_elements::{FontName, TextAlignment, TextElement};
 use crate::game_context::{GameContext, GameState, Point};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
@@ -79,7 +79,12 @@ impl Renderer {
         context: &GameContext,
         texture_creator: &TextureCreator<WindowContext>,
     ) -> Result<(), String> {
-        for element in &context.text_elements {
+        let mut elements_as_vec = context
+            .text_elements
+            .values()
+            .collect::<Vec<&TextElement>>();
+        elements_as_vec.sort_by(|a, b| a.draw_order.cmp(&b.draw_order));
+        for element in elements_as_vec {
             if element.visible {
                 if element.is_overlay {
                     self.create_overlay();
