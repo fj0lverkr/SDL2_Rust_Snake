@@ -229,6 +229,8 @@ impl GameContext {
 
     fn game_over(&mut self) {
         self.state = GameState::Over;
+        let game_over_text_element = self.text_elements.get_mut("game_over_element").unwrap();
+        game_over_text_element.visible = true;
         println!("Final score: {}!", self.score);
     }
 
